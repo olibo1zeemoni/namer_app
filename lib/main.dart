@@ -32,6 +32,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   var favorites = <WordPair>[];
+  var index = 0;
 
   void toggleFavorite() {
     if (favorites.contains(current)) {
@@ -39,6 +40,11 @@ class MyAppState extends ChangeNotifier {
     } else {
       favorites.add(current);
     }
+    notifyListeners();
+  }
+
+  void nextFavorite() {
+    index == (favorites.length - 1) ? index = 0 : index++;
     notifyListeners();
   }
 }
@@ -59,10 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (selectedIndex) {
       case 0:
         page = GeneratorPage();
-      // break;
       case 1:
-        page = Placeholder();
-      // break;
+        page = FavoritesPage();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -140,6 +144,42 @@ class GeneratorPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   appState.getNext();
+                },
+                child: Text('Next'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FavoritesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var theme = Theme.of(context);
+    var style = theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onPrimary,
+    );
+
+    if (appState.favorites.isEmpty) {
+      return Center(child: Text('No Favorites Yet', style: style));
+    }
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          BigCard(pair: appState.favorites[appState.index]),
+          SizedBox(height: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  appState.nextFavorite();
                 },
                 child: Text('Next'),
               ),
